@@ -3,7 +3,7 @@ from flask import Flask, request
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import jwt
-from security import *
+from tools import *
 from functools import wraps
 
 # debuge mode
@@ -21,6 +21,27 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # set the secret key
 app.config['SECRET_KEY'] = 'your-secret-key'
 
+# Authentication decorator
+def token_required(f):
+    @wraps(f)
+    def decorator():
+        token = None
+        # ensure the jwt-token is passed with the headers
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+        if not token: # throw error if no token provided
+            return "{'message': 'A valid token is missing!'}"
+        try:
+           # decode the token to obtain user public_id
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            if data['public_id'] == None:
+                raise Exception()
+            
+        except:
+            return "{'message': 'Invalid token!'}"
+         # Return the user information attached to the token
+        return f()
+    return decorator
 
 # Login method responsible for generating authentication tokens
 @app.route('/login', methods=['POST'])
@@ -50,28 +71,7 @@ def login():
 
     return  "{'token': " + str(token) + "}"
 
-# Authentication decorator
-def token_required(f):
-    @wraps(f)
-    def decorator():
-        token = None
-        # ensure the jwt-token is passed with the headers
-        if 'x-access-token' in request.headers:
-            token = request.headers['x-access-token']
-        if not token: # throw error if no token provided
-            return "{'message': 'A valid token is missing!'}"
-        try:
-           # decode the token to obtain user public_id
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            if data['public_id'] == None:
-                raise Exception()
-            
-        except:
-            return "{'message': 'Invalid token!'}"
-         # Return the user information attached to the token
-        return f()
-    return decorator
-
+# Print method responsible for recieving files from the client
 @app.route('/print', methods=['POST'])
 @token_required
 def _print():
@@ -108,6 +108,7 @@ def _print():
 
     return "{'message': 'file has recieved', file_name="+filename+"}"
 
+# Check method responsible for checking the number of files that are waiting to be printed
 @app.route('/check', methods=['GET'])
 @token_required
 def _check():  

@@ -1,5 +1,7 @@
 # multi-vitamin-printer-server
 
-This server has two APIs:
+This server has some APIs:
 - Send a PDF file to the server and the server will print it.
-- Send the PDF file name and check if the file has been printed or not.
+- Check how many pages are left in the printer.
+- login to the server and get a token.
+

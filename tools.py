@@ -1,6 +1,5 @@
 import argon2
 import json
-from flask import request
 
 
 def check_username_password(username, password):
