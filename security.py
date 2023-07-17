@@ -1,5 +1,6 @@
 import argon2
 import json
+from flask import request
 
 
 def check_username_password(username, password):
@@ -12,10 +13,15 @@ def check_username_password(username, password):
         data = json.load(json_file)
         username_hash = bytes(data['username'], "UTF-8")
         password_hash = bytes(data['password'], "UTF-8")
+        pulbic_id = data['public_id']
         #argon2.verify_password(username_hash, username)
     try:
         argon2.verify_password(password_hash, password)  
         argon2.verify_password(username_hash, username)
-        return True
+        return True, pulbic_id
     except:
-        return False
+        return False, None
+
+
+
+

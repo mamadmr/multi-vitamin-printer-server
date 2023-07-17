@@ -1,1 +1,4 @@
 .vscode/c_cpp_properties.json
+__pycache__/
+to_print_files/
+.DS_Store
